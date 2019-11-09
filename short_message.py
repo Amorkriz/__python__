@@ -12,7 +12,7 @@ def main():
     params = urllib.parse.urlencode({'account':'C11774538',\
     'password':'792dbedd0895bbc5106334821b49d059',\
     'content':'您的验证码是：191519。请不要把验证码泄露给其他人。',\
-    'mobile':'17312303193',\
+    'mobile':'17312303196',\
     'format':'json'\
     })
     print(params)
