@@ -203,7 +203,17 @@ def transfer(words):
     B = [[] for _ in range(8)]
     for _ in range(len(words)):
         for __ in range(len(words[_])):
-            R[getN_lines(_)].append(int(words[_][__][20:30],2)-512)
-            G[getN_lines(_)].append(int(words[_][__][10:20],2)-512)
-            B[getN_lines(_)].append(int(words[_][__][0:10],2)-512)
+            tempR,tempG,tempB = words[_][__][20:30],words[_][__][10:20],words[_][__][0:10]
+            mR,mG,mB = uint2int(tempR),uint2int(tempG),uint2int(tempB)
+            R[getN_lines(_)].append(mR)
+            G[getN_lines(_)].append(mG)
+            B[getN_lines(_)].append(mB)
     return R,G,B
+
+def uint2int(words):
+    temp = words[1:10]
+    if words[0] == '1':
+        m = -int(temp,2)
+    else:
+        m = int(temp,2)
+    return m
