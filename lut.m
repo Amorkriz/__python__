@@ -1,25 +1,32 @@
 
+% t = xlsread('lut.xlsx');
 t = xlsread('test.xls');
-
 origin = t(1:4913,1:3);
 result = t(1:4913,4:6);
 
+% 
 % for i=1:4913
 %     for j=1:3
-%         result(i,j) = 255 - origin(i,j);        %对像素值取反，用作测试。
+%         %result(i,j) = 255 - origin(i,j);        %对像素值取反，用作测试。
+%         result(i,j) = origin(i,j);
 %     end
 % end
 
 
 
-im = imread('test1.jpg');
+im = imread('sc.bmp');
+%im = imread('test1.jpg');
+%im = zeros(400,400,3,'uint8');
+%im = im + 255;
 figure(1);imshow(im);
+
+im = double(im);
 
 [M,N,L] = size(im);
 
 
 out_im = zeros(M,N,L);
-out_im2 = zeros(M,N,L);
+out_im2 = zeros(M,N,L, 'double');
 
 
 
@@ -41,15 +48,15 @@ for i=1:M
              im_b(i,j) = 256;
         end
         
-        pos_r = im_r(i,j)/16;     %先得到8个相邻坐标中最小的那个
-        pos_g = im_g(i,j)/16;
-        pos_b = im_b(i,j)/16 + 1;
+        pos_r = fix(im_r(i,j)/16);     %先得到8个相邻坐标中最小的那个
+        pos_g = fix(im_g(i,j)/16);
+        pos_b = fix(im_b(i,j)/16) + 1;
+        
         
         rem_r = rem(im_r(i,j),16);      %通过求余数来计算距离
         rem_g = rem(im_g(i,j),16);
         rem_b = rem(im_b(i,j),16);
         remainder = [rem_r,rem_g,rem_b];
-        remainder = uint16(remainder);
         
         % 简化版线性插值
         %   函数repos(pos_r,pos_g,pos_b)表示将RGB坐标转换为二维表中的横坐标        
@@ -61,13 +68,13 @@ for i=1:M
        
         
         %精确三线性插值
-        temp_00 = zeros(1,3);
-        temp_10 = zeros(1,3);
-        temp_01 = zeros(1,3);
-        temp_11 = zeros(1,3);
-        temp_0 = zeros(1,3);
-        temp_1 = zeros(1,3);
-        temp = zeros(1,3);
+        temp_00 = zeros(1,3,'double');
+        temp_10 = zeros(1,3,'double');
+        temp_01 = zeros(1,3,'double');
+        temp_11 = zeros(1,3,'double');
+        temp_0 = zeros(1,3,'double');
+        temp_1 = zeros(1,3,'double');
+        temp = zeros(1,3,'double');
         
         %处理边界点，避免越界
         if pos_r > 15
@@ -78,16 +85,16 @@ for i=1:M
             pos_g = 15;
             remainder(2) =15;
         end
-        if pos_b > 15
-            pos_b = 15;
-            remainder(3) =15;
+        if pos_b > 16
+            pos_b = 16;
+            remainder(3) =16;
         end     
 
         for k = 1:3
             temp_00(1,k) = (result(repos(pos_r,pos_g,pos_b),k) * (16 - remainder(3)) + result(repos(pos_r,pos_g,pos_b + 1),k) * remainder(3)) / 16;
             temp_10(1,k) = (result(repos(pos_r,pos_g + 1,pos_b),k) * (16 - remainder(3)) + result(repos(pos_r,pos_g + 1,pos_b + 1),k) * remainder(3)) / 16;
             temp_01(1,k) = (result(repos(pos_r + 1,pos_g,pos_b),k) * (16 - remainder(3)) + result(repos(pos_r + 1,pos_g,pos_b + 1),k) * remainder(3)) / 16;
-            temp_11(1,k) = (result(repos(pos_r + 1,pos_g + 1,pos_b),k) * (16 - remainder(3)) + result(repos(pos_r + 1,pos_g + 1,pos_b + 1),k) * remainder(3)) / 16;
+            temp_11(1,k) = (result(repos(pos_r + 1,pos_g + 1,pos_b),k) * (17 - remainder(3)) + result(repos(pos_r + 1,pos_g + 1,pos_b + 1),k) * remainder(3)) / 17;
 
             temp_0(1,k) = (temp_00(1,k) * (16 - remainder(2)) + temp_10(1,k) * remainder(2)) / 16;
             temp_1(1,k) = (temp_01(1,k) * (16 - remainder(2)) + temp_11(1,k) * remainder(2)) / 16;
@@ -100,7 +107,14 @@ for i=1:M
         
     end
 end
-out_im;
+% out_im2 = im + out_im2;
 %figure(2);imshow(uint8(out_im));
 figure(3);imshow(uint8(out_im2));
- imwrite(uint8(out_im2),'test111.jpg'); 
+% imwrite(uint8(out_im2),'sc_test.jpg'); 
+
+a = abs(im - out_im2);
+figure(4);hist(a(:));
+
+
+
+
