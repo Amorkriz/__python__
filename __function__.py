@@ -238,5 +238,5 @@ def uint2int(a):
         a_add_1 = add_1(a_reverse)  # 二进制加1
         a_int = -int(a_add_1, 2)
     else:
-        a_int = int(a[1:])
+        a_int = int(a[1:],2)
     return a_int
